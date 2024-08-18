@@ -20,7 +20,7 @@
   }
   
   body {
-      background-image: url(https://t3.ftcdn.net/jpg/06/37/79/62/360_F_637796226_liOHveRjDicrSL7U5Z4ErzMaFf2c1ybe.jpg);
+      background-image: url(https://static.vecteezy.com/system/resources/previews/027/865/586/non_2x/set-of-restaurant-doodles-food-and-drinks-on-black-background-vector.jpg);
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
@@ -69,73 +69,49 @@
       color: white;
   }
 
-  button {
-      padding: 0.6em 2em;
-      border: none;
-      outline: none;
-      color: rgb(255, 255, 255);
-      background: #111;
-      cursor: pointer;
-      position: relative;
-      z-index: 0;
-      border-radius: 10px;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-  }
+ /* From Uiverse.io by AlimurtuzaCodes */ 
+.btn {
+  border: none;
+  width: 15em;
+  height: 5em;
+  border-radius: 3em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: #000000;
+  cursor: pointer;
+  transition: all 450ms ease-in-out;
+}
 
-  button:before {
-      content: "";
-      background: linear-gradient(
-          45deg,
-          #ff0000,
-          #ff7300,
-          #fffb00,
-          #48ff00,
-          #00ffd5,
-          #002bff,
-          #7a00ff,
-          #ff00c8,
-          #ff0000
-      );
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      background-size: 400%;
-      z-index: -1;
-      filter: blur(5px);
-      -webkit-filter: blur(5px);
-      width: calc(100% + 4px);
-      height: calc(100% + 4px);
-      animation: glowing-button-85 20s linear infinite;
-      transition: opacity 0.3s ease-in-out;
-      border-radius: 10px;
-  }
+.sparkle {
+  fill: #AAAAAA;
+  transition: all 800ms ease;
+}
 
-  @keyframes glowing-button-85 {
-      0% {
-          background-position: 0 0;
-      }
-      50% {
-          background-position: 400% 0;
-      }
-      100% {
-          background-position: 0 0;
-      }
-  }
+.text {
+  font-weight: 600;
+  color: #AAAAAA;
+  font-size: medium;
+}
 
-  button:after {
-      z-index: -1;
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: #222;
-      left: 0;
-      top: 0;
-      border-radius: 10px;
-  }
+.btn:hover {
+  background: linear-gradient(0deg,#A47CF3,#683FEA);
+  box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.4),
+  inset 0px -4px 0px 0px rgba(0, 0, 0, 0.2),
+  0px 0px 0px 4px rgba(255, 255, 255, 0.2),
+  0px 0px 180px 0px #9917FF;
+  transform: translateY(-2px);
+}
 
+.btn:hover .text {
+  color: white;
+}
+
+.btn:hover .sparkle {
+  fill: white;
+  transform: scale(1.2);
+} 
 /* HTML: <div class="loader"></div> */
 #loader {
   width: 400px;
@@ -366,7 +342,14 @@ input:focus {
   </div>
   <input required="" placeholder="Enter items..." type="text" name="pitems" id="items" />
 </div>
-<button type="submit" id="first-submit" class="btn btn-primary">Generate</button>
+
+<button class="btn" type="submit" id="first-submit" style="border: 1px solid white;">
+    <svg height="24" width="24" fill="#FFFFFF" viewBox="0 0 24 24" data-name="Layer 1" id="Layer_1" class="sparkle">
+        <path d="M10,21.236,6.755,14.745.264,11.5,6.755,8.255,10,1.764l3.245,6.491L19.736,11.5l-6.491,3.245ZM18,21l1.5,3L21,21l3-1.5L21,18l-1.5-3L18,18l-3,1.5ZM19.333,4.667,20.5,7l1.167-2.333L24,3.5,21.667,2.333,20.5,0,19.333,2.333,17,3.5Z"></path>
+    </svg>
+
+    <span class="text">Generate</span>
+</button>
             </div>
             <div  id="loader" style="display: none;margin: 10px;">
                 <div class="spinner"></div>
@@ -382,7 +365,13 @@ input:focus {
             </div>
         
             <!-- Second submit button to add the recipe to the wishlist -->
-            <button type="submit" id="second-submit" class="btn btn-primary" style="display: none;">Add to Wishlist</button>
+            <button class="btn" type="submit" id="second-submit" style="display: none;">
+              <svg height="24" width="24" fill="#FFFFFF" viewBox="0 0 24 24" data-name="Layer 1" id="Layer_1" class="sparkle">
+                  <path d="M10,21.236,6.755,14.745.264,11.5,6.755,8.255,10,1.764l3.245,6.491L19.736,11.5l-6.491,3.245ZM18,21l1.5,3L21,21l3-1.5L21,18l-1.5-3L18,18l-3,1.5ZM19.333,4.667,20.5,7l1.167-2.333L24,3.5,21.667,2.333,20.5,0,19.333,2.333,17,3.5Z"></path>
+              </svg>
+          
+              <span class="text">Add to Wishlist</span>
+          </button>
         </form>
         
     </div>

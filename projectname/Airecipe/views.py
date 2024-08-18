@@ -1,10 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from groq import Groq
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import WishlistItem  # Import the model
 from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.models import User # this is for sign Up
+from django.contrib.auth import authenticate,login,logout
+#from django.shortcuts import render, redirect
+from django.contrib import messages
+#from django.contrib.auth import authenticate, login
+
 
 
 # Home view
@@ -102,3 +108,44 @@ def update(request,id):
             return redirect('wishlist-page')
     else:
         return render(request,"update.html",{'student': student})
+    
+# def signupPage(request):
+#     if request.method=='POST':
+#         uname=request.POST.get('txt')
+#         email=request.POST.get('Email')
+#         pass1=request.POST.get('password1')
+#         pass2=request.POST.get('password2')
+        
+#         if pass1!=pass2 or User.objects.filter(email=email).exists():
+            
+#             return redirect('signup-page')
+#         else:
+#          my_user=User.objects.create_user(uname,email,pass1)
+#          my_user.save()
+        
+#         return redirect('index-page')
+#     return render (request,'signUpPage.html')
+
+
+
+def loginPage(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        pass1 = request.POST.get('pass')
+        print(username, pass1)
+
+        # Hardcoded authentication for a single user
+        if username == 'admin' and pass1 == '#admin':
+            # Manually log in the user (bypassing the authentication system)
+            # You may want to set a session or flag here if needed
+            return redirect('index-page')  # Redirect to the index page on success
+        else:
+            messages.error(request, "Invalid username or password")
+            return redirect('login-page')  # Redirect back to login page on failure
+    
+    return render(request, 'login.html')
+
+
+def logoutPage(request):
+    logout(request)
+    return redirect('login-page')
