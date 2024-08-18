@@ -1,66 +1,60 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<title>Slide Navbar</title>
-	<link rel="stylesheet" type="text/css" href="slide navbar style.css">
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="Description" content="Enter your description here"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+<title>Title</title>
 <style>
-    body{
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        font-family: 'Jost', sans-serif;
+    body {
         background-image: url(https://cdn.pixabay.com/photo/2023/10/05/17/29/ai-generated-8296498_960_720.jpg);
         background-repeat: no-repeat;
         background-size: cover;
+        display: flex;
+        flex-direction: column  ;
+        justify-content: center;
+        align-items: center;
     }
-    .form {
-        /* From https://css.glass */
-background: rgba(255, 255, 255, 0.36);
-border-radius: 16px;
-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-backdrop-filter: blur(9.4px);
--webkit-backdrop-filter: blur(9.4px);
-border: 1px solid rgba(255, 255, 255, 0.3);
+    h1{
+        margin-bottom: 50px;
+        color: white;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     }
-    .main{
+    .form1 {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.36);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(9.4px);
+        -webkit-backdrop-filter: blur(9.4px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        margin-top: 200px;
         width: 350px;
         height: 350px;
-        background: red;
-        overflow: hidden;
-        background: url("https://doc-08-2c-docs.googleusercontent.com/docs/securesc/68c90smiglihng9534mvqmq1946dmis5/fo0picsp1nhiucmc0l25s29respgpr4j/1631524275000/03522360960922298374/03522360960922298374/1Sx0jhdpEpnNIydS4rnN4kHSJtU1EyWka?e=view&authuser=0&nonce=gcrocepgbb17m&user=03522360960922298374&hash=tfhgbs86ka6divo3llbvp93mg4csvb38") no-repeat center/ cover;
-        border-radius: 10px;
         box-shadow: 5px 20px 50px #000;
+
     }
-    #chk{
-        display: none;
-    }
-    .signup{
-        position: relative;
-        width:100%;
-        height: 100%;
-    }
-    label{
-        color: #fff;
-        font-size: 2.3em;
-        justify-content: center;
+    form {
         display: flex;
-        margin: 50px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: .5s ease-in-out;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
     }
+
     input{
-        width: 60%;
-        height: 10px;
+        width: 200px;
+        height: 30px;
         background: #e0dede;
         justify-content: center;
         display: flex;
-        margin: 20px auto;
         padding: 12px;
         border: none;
         outline: none;
@@ -107,31 +101,31 @@ border: 1px solid rgba(255, 255, 255, 0.3);
     #chk:checked ~ .signup label{
         transform: scale(.6);
     }
-    @media (max-width: 420px) {
-    .main {
-        display: block; /* Change from flex to block */
-        flex-direction: initial; /* Reset the flex direction */
-        justify-content: initial; /* Reset justify-content */
-        align-items: initial; /* Reset align-items */
+    @media (max-width:420px) {
+        body {
+        background-image: url(https://cdn.pixabay.com/photo/2023/10/05/17/29/ai-generated-8296498_960_720.jpg);
+        background-repeat:repeat;
+        background-size: cover;
+        display: flex;
+        flex-direction: column  ;
+        justify-content: center;
+        align-items: center;
     }
-}
-
-
-    
+    }
 </style>
 </head>
 <body>
-    <div class="form">
-    <form  action="" method ="post">
-    {% csrf_token %}
-	<div class="main"> 	
-					<label for="chk" aria-hidden="true">Login</label>
-					<input type="text" id="username" name="username" placeholder="Username" required="">
-					<input type="password" id = "password" name="pass" placeholder="Password" required="">
-					<button type="submit">Login</button>
-            
-			</div>
+    <div class="form1">
+        <h1>Login</h1>
+        <form class="f" action="" method ="post">
+            {% csrf_token %}
+            <input type="text" id="username" name="username" placeholder="Username" required="">
+            <input type="password" id = "password" name="pass" placeholder="Password" required="">
+            <button type="submit">Login</button>
         </form>
     </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/js/bootstrap.min.js"></script>
 </body>
 </html>
