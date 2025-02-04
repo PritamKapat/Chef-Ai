@@ -5,7 +5,9 @@ from .views import generate_recipe
 
 
 urlpatterns = [
-    path('',views.loginPage,name='login-page'),
+    path('',views.signup,name='signup'),
+    path('login/',views.user_login,name='login'),
+    path('logout/',views.LogoutPage,name='logout'),
     path('home/',views.home2, name='index-page'),
     path('generate/',views.generate,name="generate-page"),
     path('wishlist/',views.wishlist,name="wishlist-page"),

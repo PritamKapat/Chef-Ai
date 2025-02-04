@@ -6,10 +6,11 @@ import json
 from .models import WishlistItem  # Import the model
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.models import User # this is for sign Up
-from django.contrib.auth import authenticate,login,logout
+from django.contrib.auth import authenticate, login as auth_login, logout
 #from django.shortcuts import render, redirect
 from django.contrib import messages
 #from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -22,6 +23,66 @@ def generate(request):
     return render(request, "generate.html")
 def profile(request):
     return render(request, "profile.html")
+@login_required(login_url='login')
+
+def signup(request):
+
+    if request.method == 'POST':
+
+        uname = request.POST.get('username')
+
+        email = request.POST.get('email')
+
+        pass1 = request.POST.get('password1')
+
+        pass2 = request.POST.get('password2')
+
+
+        if pass1 != pass2:
+
+            return render(request, 'signup.html', {"error": "Passwords do not match!"})
+
+
+        if User.objects.filter(username=uname).exists():
+
+            return render(request, 'signup.html', {"error": "Username already exists! Choose another."})
+
+
+        my_user = User.objects.create_user(username=uname, email=email, password=pass1)
+
+        my_user.save()
+
+        return redirect('login')  # Redirect to the login page after signup
+
+
+    return render(request, 'signup.html')
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        pass1 = request.POST.get('password')
+
+        # Check if the username exists first
+        if not User.objects.filter(username=username).exists():
+            return render(request, 'login.html', {"error": "No account exists with this username!"})
+
+        # Authenticate user
+        user = authenticate(request, username=username, password=pass1)
+
+        if user is None:
+            auth_login(request, user)  # Correct function call
+            return redirect('index-page')  # Redirect to home2 after successful login
+        else:
+            return render(request, 'login.html', {"error": "Incorrect password!"})
+
+    return render(request, 'login.html')
+
+
+
+@login_required(login_url='login')
+def LogoutPage(request):
+    logout(request)
+    return render(request, 'login.html', {"success": "You have been logged out successfully!"})
 
 # Wishlist view
 def wishlist(request):
@@ -30,7 +91,7 @@ def wishlist(request):
 
 # Function to generate the recipe using the Groq API
 def recip(itemss):
-    client = Groq(api_key="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")
+    client = Groq(api_key="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")
 
     prompt = client.chat.completions.create(
         model="llama-3.1-8b-instant",
@@ -108,41 +169,7 @@ def update(request,id):
             return redirect('wishlist-page')
     else:
         return render(request,"update.html",{'student': student})
-    
-# def signupPage(request):
-#     if request.method=='POST':
-#         uname=request.POST.get('txt')
-#         email=request.POST.get('Email')
-#         pass1=request.POST.get('password1')
-#         pass2=request.POST.get('password2')
-        
-#         if pass1!=pass2 or User.objects.filter(email=email).exists():
-            
-#             return redirect('signup-page')
-#         else:
-#          my_user=User.objects.create_user(uname,email,pass1)
-#          my_user.save()
-        
-#         return redirect('index-page')
-#     return render (request,'signUpPage.html')
 
 
-
-def loginPage(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        pass1 = request.POST.get('pass')
-        print(username, pass1)
-
-        # Hardcoded authentication for a single user
-        if username == 'admin' and pass1 == '#admin':
-            # Manually log in the user (bypassing the authentication system)
-            # You may want to set a session or flag here if needed
-            return redirect('index-page')  # Redirect to the index page on success
-        else:
-            messages.error(request, "Invalid username or password")
-            return redirect('login-page')  # Redirect back to login page on failure
-    
-    return render(request, 'login.html')
 
 
