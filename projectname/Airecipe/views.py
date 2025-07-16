@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 
 # Home view
-def home2(request):
+def home(request):
     return render(request, "home2.html")
 
 # Generate recipe view
@@ -23,7 +23,7 @@ def generate(request):
     return render(request, "generate.html")
 def profile(request):
     return render(request, "profile.html")
-@login_required(login_url='login')
+# @login_required(login_url='login')
 
 def signup(request):
 
@@ -57,29 +57,41 @@ def signup(request):
 
     return render(request, 'signup.html')
 
+
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         pass1 = request.POST.get('password')
+        print(f"USERNAME: {username}, PASSWORD: {pass1}")
 
-        # Check if the username exists first
-        if not User.objects.filter(username=username).exists():
-            return render(request, 'login.html', {"error": "No account exists with this username!"})
-
-        # Authenticate user
-        user = authenticate(request, username=username, password=pass1)
-
-        if user is None:
-            auth_login(request, user)  # Correct function call
-            return redirect('index-page')  # Redirect to home2 after successful login
+        # ✅ Temporary hardcoded login check
+        if username == 'admin' and pass1 == '#admin':
+            return redirect('index-page')  # Replace with your actual homepage URL name
         else:
-            return render(request, 'login.html', {"error": "Incorrect password!"})
+            return render(request, 'login.html', {"error": "Invalid credentials!"})
+
+        # Original logic (commented for future use)
+        # from django.contrib.auth import authenticate, login as auth_login
+        # from django.contrib.auth.models import User
+
+        # if not User.objects.filter(username=username).exists():
+        #     return render(request, 'login.html', {"error": "No account exists with this username!"})
+
+        # user = authenticate(request, username=username, password=pass1)
+
+        # if user is not None:
+        #     auth_login(request, user)
+        #     return redirect('index-page')
+        # else:
+        #     return render(request, 'login.html', {"error": "Incorrect password!"})
 
     return render(request, 'login.html')
 
 
 
-@login_required(login_url='login')
+
+# @login_required(login_url='login')
 def LogoutPage(request):
     logout(request)
     return render(request, 'login.html', {"success": "You have been logged out successfully!"})
