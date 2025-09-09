@@ -12,6 +12,7 @@
 <meta name="Description" content="Enter your description here"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/style.css' %}"> <!-- Add this line for your static CSS -->
 <title>Generate Recipe</title>
 </head>
 <!-- Bootstrap CSS -->
@@ -483,13 +484,17 @@ input:focus {
                 <button type="submit" id="first-submit" class="btn btn-primary">Generate</button>
             </div> -->
           
-<button class="btn" id="dropdownMenuButton" onclick="openCamera()" style="color: white;">🔍 Ai Scan</button>
+<div style="display: flex; gap: 10px;">
+  <button class="btn" onclick="openCamera()" style="color: white;width:150px;height:50px;margin:10px">🔍 Ai Scan</button>
+  <button class="btn" onclick="document.getElementById('uploadFile').click()" style="color: white;width:150px;height:50px;margin:10px">📁 Upload Image</button>
+  <input type="file" id="uploadFile" accept="image/*" style="display: none;">
+</div>
 
 <div id="overlay"></div>
 
 <div id="cameraPopup">
   <video id="video" autoplay></video>
-  <button class="btn" id="dropdownMenuButton" onclick="closeCamera()" style="color: white;">Click</button>
+  <button class="btn" id="dropdownMenuButton" onclick="captureImage()" style="color: white;">Click</button>
 </div>
 <div class="hi">
 <div class="messageBox">
@@ -667,6 +672,72 @@ input:focus {
     overlay.style.display = 'none';
     document.getElementById('video').srcObject = null;
   }
+
+  function captureImage() {
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = canvas.toDataURL('image/jpeg');
+
+    // Send to server
+    fetch("{% url 'ai_scan_predict' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: 'image=' + encodeURIComponent(imageData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.predicted_class) {
+        document.getElementById('items').value = data.predicted_class;
+        closeCamera();
+      } else {
+        alert('Prediction failed: ' + (data.error || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error capturing image: ' + error.message);
+    });
+  }
+
+  // Handle file upload
+  document.getElementById('uploadFile').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageData = e.target.result;
+        // Send to server
+        fetch("{% url 'ai_scan_predict' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: 'image=' + encodeURIComponent(imageData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.predicted_class) {
+            document.getElementById('items').value = data.predicted_class;
+          } else {
+            alert('Prediction failed: ' + (data.error || 'Unknown error'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error uploading image: ' + error.message);
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
       const checkboxes = document.querySelectorAll('.diet-checkbox');
 
   checkboxes.forEach(cb => {
@@ -687,50 +758,83 @@ input:focus {
             
             var items = document.getElementById('items').value;
             var storedRecipeInput = document.getElementById('stored-recipe');
-            
+
+            // Get all diet and regional checkboxes
+            var dietCheckboxes = document.querySelectorAll('.diet-checkbox');
+            var dietType = '';
+            var regional = '';
+            // Diet type checkboxes are the first group (inside the first dropdown)
+            // Regional checkboxes are the second group (inside the second dropdown)
+            var dietLabels = ["Rich", "Low Oil", "Digestive Friendly", "Weight Loss", "Weight Gain"];
+            var regionalLabels = ["North Indian", "South Indian", "Bengali", "Chinese", "Continental"];
+            // Ensure only one checkbox per group can be selected
+            // (already handled by the change event, but double-check here)
+            for (let i = 0; i < dietCheckboxes.length; i++) {
+                if (i < dietLabels.length && dietCheckboxes[i].checked) {
+                    dietType = dietLabels[i];
+                }
+                if (i >= dietLabels.length && dietCheckboxes[i].checked) {
+                    regional = regionalLabels[i - dietLabels.length];
+                }
+            }
+            // Always send both parameters, even if empty
             if (event.submitter.id === 'first-submit') {
-                // If the "Generate" button was clicked
                 fetch("{% url 'generate_recipe' %}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
-                    body: JSON.stringify({ items: items })
+                    body: JSON.stringify({ items: items, diet_type: dietType, regional: regional })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            return response.json().then(data => {
+                                throw new Error(data.error || 'Failed to generate recipe');
+                            });
+                        } else {
+                            throw new Error('Authentication required. Please log in first.');
+                        }
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    document.getElementById('generated-recipe').textContent = data.recipe;
-        
-                    // Store the generated recipe in the hidden input field
+                    let output = '';
+                    if (data.diet_type) {
+                        output += 'Diet Type: ' + data.diet_type + '\n';
+                    }
+                    if (data.regional) {
+                        output += 'Regional: ' + data.regional + '\n';
+                    }
+                    output += '\n' + data.recipe;
+                    document.getElementById('generated-recipe').textContent = output;
                     storedRecipeInput.value = data.recipe;
-        
-                    // Show the recipe container
                     document.getElementById('recipe-container').style.display = 'block';
-        
-                    // Show the "Add to Wishlist" button
                     document.getElementById('second-submit').style.display = 'inline-block';
-        
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    if (error.message.includes('limit') || error.message.includes('Recipe generation limit')) {
+                        alert('You have exceeded your daily limit of 3 recipes per day. Please try again tomorrow!');
+                    } else {
+                        alert('Error generating recipe: ' + error.message);
+                    }
                 });
             } else if (event.submitter.id === 'second-submit') {
-                // If the "Add to Wishlist" button was clicked
                 fetch("{% url 'add_to_wishlist' %}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
-                    body: JSON.stringify({ items: items, recipe: storedRecipeInput.value }) // Updated to include both items and recipe
+                    body: JSON.stringify({ items: items, recipe: storedRecipeInput.value, diet_type: dietType, regional: regional })
                 })
                 .then(response => {
                     if (response.ok) {
-                        // Handle success, maybe redirect to the wishlist page or show a success message
                         alert('Recipe added to wishlist!');
                     } else {
-                        // Handle error
                         alert('Failed to add recipe to wishlist.');
                     }
                 })

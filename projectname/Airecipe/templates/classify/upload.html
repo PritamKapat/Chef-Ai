@@ -1,0 +1,8 @@
+{% block content %}
+<h2>Upload an Image for Classification</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">Classify</button>
+</form>
+{% endblock %}

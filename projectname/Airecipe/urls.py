@@ -6,6 +6,7 @@ from .views import generate_recipe
 
 urlpatterns = [
     path('',views.signup,name='signup'),
+     path('predict/', views.upload_image, name='image_classifier'),
     path('login/',views.user_login,name='login'),
     path('logout/',views.LogoutPage,name='logout'),
     path('home/',views.home, name='index-page'),
@@ -15,5 +16,6 @@ urlpatterns = [
     path('add-to-wishlist/', views.add_to_wishlist, name='add_to_wishlist'),
     path('delete/<int:id>/', views.delete_item, name='delete-page'),
     path('update/<int:id>',views.update, name="update-page"),
-    path('profile/',views.profile, name="profile-page"), 
+    path('profile/',views.profile, name="profile-page"),
+    path('ai-scan-predict/', views.ai_scan_predict, name='ai_scan_predict'),
 ]
