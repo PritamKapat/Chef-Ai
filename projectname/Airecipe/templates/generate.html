@@ -1,4 +1,4 @@
-{% extends "nav.html" %}]
+{% extends "nav.html" %}
 {% load static %}
 
 {% block title %}Generate{% endblock title %}
@@ -49,7 +49,8 @@
       
   }
   .glass-container {
-    margin: 10px;
+      margin-top: 20px;
+      margin-left: 200px;
       display: none;
       width: 700px;
       max-height: 300px;
@@ -496,6 +497,12 @@ input:focus {
   <video id="video" autoplay></video>
   <button class="btn" id="dropdownMenuButton" onclick="captureImage()" style="color: white;">Click</button>
 </div>
+<!-- Add Items From Inventory Button -->
+<button type="button" class="btn" style="color:white;width:180px;height:50px;margin:10px" 
+        data-bs-toggle="modal" data-bs-target="#inventoryModal">
+    📦 Add From Inventory
+</button>
+
 <div class="hi">
 <div class="messageBox">
   <div class="fileUploadWrapper">
@@ -594,12 +601,35 @@ input:focus {
             <input type="hidden" id="stored-recipe" name="recipe" value="">
         
             <!-- Container to display the generated recipe -->
-            <div class="glass-container" id="recipe-container" style="display: none;">
-                <pre style="color: white; margin: 5px;font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;" id="generated-recipe"></pre>
-            </div>
+            <div class="glass-container d-flex" id="recipe-container" style="display:none; gap:20px;">
+    
+    <!-- LEFT SIDE: RECIPE -->
+    <pre id="generated-recipe"
+         style="color:white; width:60%; white-space:pre-wrap; font-size:16px;">
+    </pre>
+
+    <!-- RIGHT SIDE: IMAGE -->
+    <div style="width:40%; text-align:center;">
+        <button class="btn btn-info mb-2" id="generate-image-btn" 
+                style="display:none; width:180px;">
+            Generate Image
+        </button>
+
+        <img id="recipe-image" 
+             style="display:none; width:100%; border-radius:12px;">
+    </div>
+
+</div>
+
+            <button type="button" class="btn btn-warning mt-3" id="cook-btn"
+                    style="display:none;width:200px;height:50px;">
+                🍳 Cook Now
+            </button>
+
         
             <!-- Second submit button to add the recipe to the wishlist -->
           <button class="cta" type="submit" id="second-submit" style="display: none; width:200px;height:50px">
+
             <span class="span" style="font-size: 20px;">Add to wishlist</span>
             <span class="second">
               <svg
@@ -639,6 +669,68 @@ input:focus {
         </form>
         
     </div>
+    <!-- INVENTORY SELECTION MODAL -->
+<div class="modal fade" id="inventoryModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-3">
+
+      <h4 class="fw-bold mb-3">Select Ingredients From Inventory</h4>
+
+      <form id="inventory-selection-form">
+
+        <table class="table table-dark table-striped">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th>Ingredient</th>
+              <th>Freshness</th>
+              <th>Available</th>
+              <th>Use</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for item in inventory_items %}
+            <tr>
+              <td>
+                <input type="checkbox" class="inv-check" data-id="{{ item.id }}">
+              </td>
+
+              <td>{{ item.name }}</td>
+
+              <td>
+                {% if item.freshness == "fresh" %}
+                  <span class="badge bg-success">Fresh</span>
+                {% elif item.freshness == "medium" %}
+                  <span class="badge bg-warning text-dark">Medium</span>
+                {% else %}
+                  <span class="badge bg-danger">Old</span>
+                {% endif %}
+              </td>
+
+              <td>{{ item.quantity }} {{ item.unit }}</td>
+
+              <td>
+                <input type="number" class="form-control use-qty" 
+                       style="width:90px" min="1" 
+                       max="{{ item.quantity }}" 
+                       placeholder="0">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <button type="button" class="btn btn-primary w-100 mt-3" id="add-from-inventory-btn">
+          Add Selected Items
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
     
     <script>
        let stream = null;
@@ -693,11 +785,27 @@ input:focus {
     })
     .then(response => response.json())
     .then(data => {
-      if (data.predicted_class) {
-        document.getElementById('items').value = data.predicted_class;
+      console.log("YOLO Response:", data);
+
+      if (data.ingredients && data.ingredients.length > 0) {
+        // Count occurrences of each ingredient
+        let counts = {};
+        data.ingredients.forEach(item => {
+            let name = item.name.toLowerCase();
+            counts[name] = (counts[name] || 0) + 1;
+        });
+
+        // Convert to "name:qtypcs" format
+        let finalList = Object.entries(counts)
+            .map(([name, qty]) => `${name}:${qty}pcs`)
+            .join(", ");
+
+        // Put into input box
+        document.getElementById('items').value = finalList;
+
         closeCamera();
       } else {
-        alert('Prediction failed: ' + (data.error || 'Unknown error'));
+        alert("No ingredients detected");
       }
     })
     .catch(error => {
@@ -724,12 +832,28 @@ input:focus {
         })
         .then(response => response.json())
         .then(data => {
-          if (data.predicted_class) {
-            document.getElementById('items').value = data.predicted_class;
+          console.log("YOLO Response:", data);
+
+          if (data.ingredients && data.ingredients.length > 0) {
+            // Count occurrences of each ingredient
+            let counts = {};
+            data.ingredients.forEach(item => {
+                let name = item.name.toLowerCase();
+                counts[name] = (counts[name] || 0) + 1;
+            });
+
+            // Convert to "name:qtypcs" format
+            let finalList = Object.entries(counts)
+                .map(([name, qty]) => `${name}:${qty}pcs`)
+                .join(", ");
+
+            // Put into input box
+            document.getElementById('items').value = finalList;
           } else {
-            alert('Prediction failed: ' + (data.error || 'Unknown error'));
+            alert("No ingredients detected");
           }
         })
+
         .catch(error => {
           console.error('Error:', error);
           alert('Error uploading image: ' + error.message);
@@ -813,6 +937,10 @@ input:focus {
                     storedRecipeInput.value = data.recipe;
                     document.getElementById('recipe-container').style.display = 'block';
                     document.getElementById('second-submit').style.display = 'inline-block';
+                    document.getElementById('cook-btn').style.display = 'inline-block';
+                    // Show Generate Image button
+                    document.getElementById("generate-image-btn").style.display = "inline-block";
+
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -858,7 +986,109 @@ input:focus {
         document.getElementById('first-submit').addEventListener('click', function() {
             showLoader();
         });
-        
+
+      document.getElementById("add-from-inventory-btn").addEventListener("click", function () {
+
+    let finalList = "";
+    let itemsInput = document.getElementById("items");
+
+    document.querySelectorAll("tbody tr").forEach(row => {
+        let checkbox = row.querySelector(".inv-check");
+        let qtyInput = row.querySelector(".use-qty");
+
+        if (checkbox.checked) {
+            let name = row.children[1].innerText;
+            let qty = qtyInput.value;
+            if (!qty || qty <= 0) return; // skip if empty
+
+            let available = row.children[3].innerText; // contains "200 g" or "4 pcs"
+            let unit = available.split(" ")[1] || "";
+
+            finalList += `${name}:${qty}${unit}, `;
+        }
+    });
+
+    // Append to input box
+    itemsInput.value = (itemsInput.value + " " + finalList).trim();
+
+    // Close modal
+    let modal = bootstrap.Modal.getInstance(document.getElementById("inventoryModal"));
+    modal.hide();
+
+    // FIX: remove leftover backdrop
+    document.body.classList.remove('modal-open');
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+});
+    document.getElementById("cook-btn").addEventListener("click", function () {
+
+    let userConfirm = confirm("Do you want to use these ingredients from your inventory?");
+
+    if (!userConfirm) return;
+
+    // Send request to backend to deduct inventory
+    fetch("{% url 'deduct_inventory' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            items: document.getElementById("items").value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("Ingredients deducted successfully!");
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(err => alert("Server error: " + err));
+});
+
+  document.getElementById("generate-image-btn").addEventListener("click", function () {
+
+    let recipeText = document.getElementById("stored-recipe").value;
+
+    if (!recipeText) {
+        alert("Recipe not found!");
+        return;
+    }
+
+    // Show loading
+    document.getElementById("generate-image-btn").innerText = "Loading...";
+    
+    fetch("{% url 'generate_recipe_image' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ recipe: recipeText })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log("IMAGE DATA:", data);
+
+        if (data.image_url) {
+            const img = document.getElementById("recipe-image");
+            img.src = data.image_url;
+            img.style.display = "block";
+        } else {
+            alert("Image generation failed!");
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Server error while generating image.");
+    })
+    .finally(() => {
+        document.getElementById("generate-image-btn").innerText = "Generate Image";
+    });
+});
+      
 
     </script>
     
